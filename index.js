@@ -8,36 +8,34 @@ const io = require('socket.io')(http, {
 
 const Database = require('./class/Database');
 const User = require('./class/User');
+const Message = require('./class/Message');
 
-const db = new Database();
+// const db = new Database();
+const user = new User();
+const message = new Message();
 
 app.get('/', (req, res) => {
     res.send('<h1>Hey Socket.io</h1>');
 });
 
 io.on('connection', socket => {
-    console.log('a user connected: ' + socket.handshake.auth.nickname);
-    const user = new User(
-        socket.handshake.auth.uuid,
-        socket.socketId,
-        socket.handshake.auth.nickname
-    );
+    console.log('a user connected: ' + socket.id);
+    user.addUser({
+        uuid: socket.handshake.auth.uuid,
+        socketId: socket.id,
+        nickname: socket.handshake.auth.nickname,
+    });
 
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
 
     socket.on('message', msg => {
-        // TODO adds the message to the database
-        console.log(msg);
-        // console.log('message: ' + msg.message);
-        socket.broadcast.emit('message', msg);
-    });
-
-    socket.on('nickname.change', user => {
-        console.log(db.findUser(user.uuid));
-        db.findUser(user.uuid).nickname = user.nickname
-        console.log(db.findUser(user.uuid));
+        socket.broadcast.emit('message', {
+            user: user.findBySocketId(socket.id),
+            content: msg,
+        });
+        message.addMessage(user.findBySocketId(socket.id).uuid, msg)
     });
 });
 

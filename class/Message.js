@@ -5,7 +5,7 @@ class Message {
     addMessage(userUuid, content) {
         this._messages.push({
             userUuid: userUuid,
-            content: string,
+            content: content,
         });
     }
 

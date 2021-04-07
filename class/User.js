@@ -1,61 +1,59 @@
 class User
 {
-    /** @type {string} */
-    _uuid;
-    /** @type {string} */
-    _socketId;
-    /** @type {string} */
-    _nickname;
+    /** @type {Array<{uuid: string; socketId: string; nickname: string}>} */
+    _users = null;
 
     /**
      * @param {string} uuid
      * @param {string} socketId
      * @param {string} nickname
      */
-    constructor(
-        uuid,
-        socketId,
-        nickname
-    ) {
-        this._uuid     = uuid;
-        this._socketId = socketId;
-        this._nickname = nickname;
+    constructor() {
+        this._users = [];
     }
 
-    get socketId() {
-        return this._socketId;
-    }
+    /**
+     * @param {{uuid: string; socketId: string; nickname: string}} user
+     * @returns {boolean}
+     */
+    addUser = (user) => {
+        // console.log(user);
+        if (!this.hasUser(user.uuid)) {
+            this._users.push(user);
 
-    set socketId(socketId) {
-        this._socketId = socketId;
-    }
-
-    get nickname() {
-        if (this._nickname) {
-            return this._nickname;
+            return;
         }
 
-        return 'Anonymous user';
+        // update socket id
+        this.find(user.uuid).socketId = user.socketId;
     }
 
-    set nickname(nickname) {
-        this._nickname = nickname;
+    hasUser = (uuid) => {
+        return this._users.find(user => user.uuid === uuid) != undefined;
     }
 
-    get uuid() {
-        return this._uuid;
+    /**
+     * @param {string} uuid
+     * @returns {{uuid: string; socketId: string; nickname: string}}
+     */
+    find = uuid  => {
+        return this._users.find(user => user.uuid === uuid);
     }
 
-    set uuid(uuid) {
-        this._uuid = uuid;
+    /**
+     * @param {string} socketId
+     * @returns {{uuid: string; socketId: string; nickname: string}}
+     */
+    findBySocketId = socketId  => {
+        return this._users.find(user => user.socketId === socketId);
     }
 
-    toJSON() {
-        return {
-            id: this.id,
-            nickname: this.nickname,
-        };
-    }
+    // toJSON() {
+    //     return {
+    //         id: this.id,
+    //         nickname: this.nickname,
+    //     };
+    // }
 }
 
 module.exports = User;
