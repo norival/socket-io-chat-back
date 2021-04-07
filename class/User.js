@@ -1,19 +1,14 @@
 class User
 {
-    /** @type {Array<{uuid: string; socketId: string; nickname: string}>} */
+    /** @type {Array<{uuid: string; socketId: string; nickname: string; online: boolean}>} */
     _users = null;
 
-    /**
-     * @param {string} uuid
-     * @param {string} socketId
-     * @param {string} nickname
-     */
     constructor() {
         this._users = [];
     }
 
     /**
-     * @param {{uuid: string; socketId: string; nickname: string}} user
+     * @param {{uuid: string; socketId: string; nickname: string; online: boolean}} user
      * @returns {boolean}
      */
     addUser = (user) => {
@@ -26,6 +21,7 @@ class User
 
         // update socket id
         this.find(user.uuid).socketId = user.socketId;
+        this.find(user.uuid).online = true;
     }
 
     hasUser = (uuid) => {
@@ -34,7 +30,7 @@ class User
 
     /**
      * @param {string} uuid
-     * @returns {{uuid: string; socketId: string; nickname: string}}
+     * @returns {{uuid: string; socketId: string; nickname: string; online: boolean}}
      */
     find = uuid  => {
         return this._users.find(user => user.uuid === uuid);
@@ -42,7 +38,7 @@ class User
 
     /**
      * @param {string} socketId
-     * @returns {{uuid: string; socketId: string; nickname: string}}
+     * @returns {{uuid: string; socketId: string; nickname: string; online: boolean}}
      */
     findBySocketId = socketId  => {
         return this._users.find(user => user.socketId === socketId);
@@ -55,7 +51,7 @@ class User
     toJSON() {
         const users = [];
 
-        for (const user of this._users) {
+        for (const user of this._users.filter(u => u.online)) {
             users.push({
                 uuid: user.uuid,
                 nickname: user.nickname,

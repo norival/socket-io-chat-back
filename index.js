@@ -24,14 +24,16 @@ io.on('connection', socket => {
         uuid: socket.handshake.auth.uuid,
         socketId: socket.id,
         nickname: socket.handshake.auth.nickname,
+        online: true,
     });
 
     // send user list when a user connect
     // TODO: send only the new user
-    socket.emit('user.connect', user);
+    io.emit('user.connect', user);
 
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        user.findBySocketId(socket.id).online = false;
+        socket.broadcast.emit('user.disconnect', user);
     });
 
     socket.on('message', msg => {
