@@ -48,12 +48,22 @@ class User
         return this._users.find(user => user.socketId === socketId);
     }
 
-    // toJSON() {
-    //     return {
-    //         id: this.id,
-    //         nickname: this.nickname,
-    //     };
-    // }
+    get users() {
+        return this._users;
+    }
+
+    toJSON() {
+        const users = [];
+
+        for (const user of this._users) {
+            users.push({
+                uuid: user.uuid,
+                nickname: user.nickname,
+            });
+        }
+
+        return users;
+    }
 }
 
 module.exports = User;

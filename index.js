@@ -26,6 +26,10 @@ io.on('connection', socket => {
         nickname: socket.handshake.auth.nickname,
     });
 
+    // send user list when a user connect
+    // TODO: send only the new user
+    socket.emit('user.connect', user);
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
