@@ -45,15 +45,28 @@ io.on('connection', socket => {
     users.addUser(user);
     console.log(users.users);
 
-    // // send user list when a user connect
-    // // TODO: send only the new user
     socket.emit('message', {
         uuid: generateUuid(),
-        content: `Welcome to the chat ${user.nickname}!`,
+        content: `
+        Welcome to the <span class="channel">general</span> channel <span
+        class="nickname">${user.nickname}</span>!
+        `,
         createdAt: new Date(),
         senderUuid: 'server',
         recipientUuid: user.uuid,
         channelUuid: channels.channels.find(ch => ch.name === 'General').uuid,
+        unread: false,
+    });
+    socket.emit('message', {
+        uuid: generateUuid(),
+        content: `
+        Welcome to the <span class="channel">blabla</span> channel
+        <span class="nickname">${user.nickname}</span>!
+        `,
+        createdAt: new Date(),
+        senderUuid: 'server',
+        recipientUuid: user.uuid,
+        channelUuid: channels.channels.find(ch => ch.name === 'Blabla').uuid,
         unread: false,
     });
 
