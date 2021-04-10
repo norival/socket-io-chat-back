@@ -9,10 +9,27 @@ const io = require('socket.io')(http, {
 const Database = require('./class/Database');
 const User = require('./class/User');
 const Message = require('./class/Message');
+const Channels = require('./class/Channels');
 
 // const db = new Database();
-const user = new User();
+const users = new User();
 const message = new Message();
+const channels = new Channels();
+
+generateUuid = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+channels.add({
+    uuid: generateUuid(),
+    name: 'General'
+}).add({
+    uuid: generateUuid(),
+    name: 'Blabla'
+});
 
 app.get('/', (req, res) => {
     res.send('<h1>Hey Socket.io</h1>');
@@ -20,29 +37,42 @@ app.get('/', (req, res) => {
 
 io.on('connection', socket => {
     console.log('a user connected: ' + socket.id);
-    user.addUser({
-        uuid: socket.handshake.auth.uuid,
-        socketId: socket.id,
-        nickname: socket.handshake.auth.nickname,
-        online: true,
+    const user = {
+        uuid: socket.handshake.auth.user.uuid,
+        socketIds: [socket.id],
+        nickname: socket.handshake.auth.user.nickname,
+    };
+    users.addUser(user);
+    console.log(users.users);
+
+    // // send user list when a user connect
+    // // TODO: send only the new user
+    socket.emit('message', {
+        uuid: generateUuid(),
+        content: `Welcome to the chat ${user.nickname}!`,
+        createdAt: new Date(),
+        senderUuid: 'server',
+        recipientUuid: user.uuid,
+        channelUuid: channels.channels.find(ch => ch.name === 'General').uuid,
+        unread: false,
     });
 
-    // send user list when a user connect
-    // TODO: send only the new user
-    io.emit('user.connect', user);
+    socket.emit('channel.update', channels.channels);
+    io.emit('userlist.update', users);
 
     socket.on('disconnect', () => {
-        user.findBySocketId(socket.id).online = false;
-        socket.broadcast.emit('user.disconnect', user);
+        users.delUser(user.uuid, socket.id);
+        // user.findBySocketId(socket.id).online = false;
+        socket.broadcast.emit('userlist.update', users);
     });
 
-    socket.on('message', msg => {
-        socket.broadcast.emit('message', {
-            user: user.findBySocketId(socket.id),
-            content: msg,
-        });
-        message.addMessage(user.findBySocketId(socket.id).uuid, msg)
-    });
+    // socket.on('message', msg => {
+    //     socket.broadcast.emit('message', {
+    //         user: user.findBySocketId(socket.id),
+    //         content: msg,
+    //     });
+    //     message.addMessage(user.findBySocketId(socket.id).uuid, msg)
+    // });
 });
 
 http.listen(3000, () => {

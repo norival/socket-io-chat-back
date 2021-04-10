@@ -1,6 +1,13 @@
+/**
+ * @typedef user
+ * @type {Object}
+ * @property {string} uuid
+ * @property {string} nickname
+ * @property {string[]} socketIds
+ */
 class User
 {
-    /** @type {Array<{uuid: string; socketId: string; nickname: string; online: boolean}>} */
+    /** @type {user[]} */
     _users = null;
 
     constructor() {
@@ -8,7 +15,7 @@ class User
     }
 
     /**
-     * @param {{uuid: string; socketId: string; nickname: string; online: boolean}} user
+     * @param {user} user
      * @returns {boolean}
      */
     addUser = (user) => {
@@ -19,18 +26,27 @@ class User
             return;
         }
 
-        // update socket id
-        this.find(user.uuid).socketId = user.socketId;
-        this.find(user.uuid).online = true;
+        // update socket ids
+        this.find(user.uuid).socketIds.concat(user.socketIds);
     }
 
     hasUser = (uuid) => {
         return this._users.find(user => user.uuid === uuid) != undefined;
     }
 
+    delUser = (uuid, socketId) => {
+        this._users = this._users.map(user => {
+            if (user.uuid === uuid) {
+                user.socketIds = user.socketIds.filter(sid => sid !== socketId);
+            }
+
+            return user;
+        }).filter(user => user.socketIds.length > 0);
+    }
+
     /**
      * @param {string} uuid
-     * @returns {{uuid: string; socketId: string; nickname: string; online: boolean}}
+     * @returns {user}
      */
     find = uuid  => {
         return this._users.find(user => user.uuid === uuid);
@@ -38,12 +54,15 @@ class User
 
     /**
      * @param {string} socketId
-     * @returns {{uuid: string; socketId: string; nickname: string; online: boolean}}
+     * @returns {user}
      */
     findBySocketId = socketId  => {
         return this._users.find(user => user.socketId === socketId);
     }
 
+    /**
+     * @returns {user}
+     */
     get users() {
         return this._users;
     }
@@ -51,7 +70,7 @@ class User
     toJSON() {
         const users = [];
 
-        for (const user of this._users.filter(u => u.online)) {
+        for (const user of this._users) {
             users.push({
                 uuid: user.uuid,
                 nickname: user.nickname,
