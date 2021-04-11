@@ -13,7 +13,7 @@ const Channels = require('./class/Channels');
 
 // const db = new Database();
 const users = new User();
-const message = new Message();
+const messages = new Message();
 const channels = new Channels();
 
 generateUuid = () => {
@@ -36,14 +36,13 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', socket => {
-    console.log('a user connected: ' + socket.id);
+    // console.log('a user connected: ' + socket.id);
     const user = {
         uuid: socket.handshake.auth.user.uuid,
         socketIds: [socket.id],
         nickname: socket.handshake.auth.user.nickname,
     };
     users.addUser(user);
-    console.log(users.users);
 
     socket.emit('message', {
         uuid: generateUuid(),
@@ -73,11 +72,18 @@ io.on('connection', socket => {
     socket.emit('channel.update', channels.channels);
     io.emit('userlist.update', users);
 
+    socket.on('message', message => {
+        message.unread = true
+        messages.add(message)
+        console.log(message);
+        socket.broadcast.emit('message', message);
+    });
+
     socket.on('disconnect', () => {
         users.delUser(user.uuid, socket.id);
-        // user.findBySocketId(socket.id).online = false;
         socket.broadcast.emit('userlist.update', users);
     });
+
 
     // socket.on('message', msg => {
     //     socket.broadcast.emit('message', {
