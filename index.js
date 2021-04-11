@@ -74,8 +74,17 @@ io.on('connection', socket => {
     socket.on('message', message => {
         message.unread = true
         messages.add(message)
-        console.log(message);
         socket.broadcast.emit('message', message);
+    });
+
+    socket.on('message.private', message => {
+        message.unread = true;
+        messages.add(message);
+        message.channelUuid = message.senderUuid;
+        const recipientSockets = users.find(message.recipientUuid).socketIds;
+        recipientSockets.forEach(sid => {
+            socket.to(sid).emit('message', message);
+        });
     });
 
     socket.on('disconnect', () => {
