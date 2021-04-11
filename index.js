@@ -36,7 +36,6 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', socket => {
-    // console.log('a user connected: ' + socket.id);
     const user = {
         uuid: socket.handshake.auth.user.uuid,
         socketIds: [socket.id],
@@ -47,8 +46,8 @@ io.on('connection', socket => {
     socket.emit('message', {
         uuid: generateUuid(),
         content: `
-        Welcome to the <span class="channel">general</span> channel <span
-        class="nickname">${user.nickname}</span>!
+        Hello there, <span class="nickname">${user.nickname}</span>! Welcome to
+        the <span class="channel">General</span> channel 
         `,
         createdAt: new Date(),
         senderUuid: 'server',
@@ -59,8 +58,8 @@ io.on('connection', socket => {
     socket.emit('message', {
         uuid: generateUuid(),
         content: `
-        Welcome to the <span class="channel">blabla</span> channel
-        <span class="nickname">${user.nickname}</span>!
+        Hello there, <span class="nickname">${user.nickname}</span>! Welcome to
+        the <span class="channel">Blabla</span> channel 
         `,
         createdAt: new Date(),
         senderUuid: 'server',
