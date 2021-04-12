@@ -1,17 +1,15 @@
-const app = require('express')();
-const http = require('http').createServer(app);
+// const app = require('express')();
+const http = require('http').Server();
 const io = require('socket.io')(http, {
     cors: {
-        origins: ['http://localhost:4200']
+        origins: ['http://norival.ddns.net:4200']
     }
 });
 
-const Database = require('./class/Database');
 const User = require('./class/User');
 const Message = require('./class/Message');
 const Channels = require('./class/Channels');
 
-// const db = new Database();
 const users = new User();
 const messages = new Message();
 const channels = new Channels();
@@ -31,9 +29,9 @@ channels.add({
     name: 'Blabla'
 });
 
-app.get('/', (req, res) => {
-    res.send('<h1>Hey Socket.io</h1>');
-});
+// app.get('/', (req, res) => {
+//     res.send('<h1>Hey Socket.io</h1>');
+// });
 
 io.on('connection', socket => {
     const user = {
@@ -91,15 +89,6 @@ io.on('connection', socket => {
         users.delUser(user.uuid, socket.id);
         socket.broadcast.emit('userlist.update', users);
     });
-
-
-    // socket.on('message', msg => {
-    //     socket.broadcast.emit('message', {
-    //         user: user.findBySocketId(socket.id),
-    //         content: msg,
-    //     });
-    //     message.addMessage(user.findBySocketId(socket.id).uuid, msg)
-    // });
 });
 
 http.listen(3000, () => {
