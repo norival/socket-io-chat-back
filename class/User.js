@@ -18,9 +18,9 @@ class User
      * @param {user} user
      * @returns {boolean}
      */
-    addUser = (user) => {
+    add = (user) => {
         // console.log(user);
-        if (!this.hasUser(user.uuid)) {
+        if (!this.has(user.uuid)) {
             this._users.push(user);
 
             return;
@@ -30,11 +30,11 @@ class User
         this.find(user.uuid).socketIds.concat(user.socketIds);
     }
 
-    hasUser = (uuid) => {
+    has = (uuid) => {
         return this._users.find(user => user.uuid === uuid) != undefined;
     }
 
-    delUser = (uuid, socketId) => {
+    del = (uuid, socketId) => {
         this._users = this._users.map(user => {
             if (user.uuid === uuid) {
                 user.socketIds = user.socketIds.filter(sid => sid !== socketId);
@@ -50,14 +50,6 @@ class User
      */
     find = uuid  => {
         return this._users.find(user => user.uuid === uuid);
-    }
-
-    /**
-     * @param {string} socketId
-     * @returns {user}
-     */
-    findBySocketId = socketId  => {
-        return this._users.find(user => user.socketId === socketId);
     }
 
     /**

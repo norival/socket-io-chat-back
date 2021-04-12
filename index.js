@@ -1,4 +1,3 @@
-// const app = require('express')();
 const http = require('http').Server();
 const io = require('socket.io')(http, {
     cors: {
@@ -29,17 +28,13 @@ channels.add({
     name: 'Blabla'
 });
 
-// app.get('/', (req, res) => {
-//     res.send('<h1>Hey Socket.io</h1>');
-// });
-
 io.on('connection', socket => {
     const user = {
         uuid: socket.handshake.auth.user.uuid,
         socketIds: [socket.id],
         nickname: socket.handshake.auth.user.nickname,
     };
-    users.addUser(user);
+    users.add(user);
 
     socket.emit('message', {
         uuid: generateUuid(),
@@ -86,7 +81,7 @@ io.on('connection', socket => {
     });
 
     socket.on('disconnect', () => {
-        users.delUser(user.uuid, socket.id);
+        users.del(user.uuid, socket.id);
         socket.broadcast.emit('userlist.update', users);
     });
 });
